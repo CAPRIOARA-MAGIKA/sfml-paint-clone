@@ -37,6 +37,7 @@ void Paint::render(){
     window.clear(sf::Color::White);
 
     window.draw(canvasSprite);
+    window.draw(brush);
 
     window.display();
 }
