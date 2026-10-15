@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "config.hpp"
+#include "ui.hpp"
 #include <optional>
 
 class Paint{
@@ -12,11 +13,14 @@ class Paint{
         void run();
 
     private:
+
+        UI ui;
         
         sf::RenderTexture canvas;
         sf::Sprite canvasSprite;
         sf::CircleShape brush;
         bool isDrawing;
+        bool isErasing;
 
         void processEvents();
         void update();
@@ -25,5 +29,5 @@ class Paint{
         void handleWindowClose(const sf::Event& event);
         void handleInput(const sf::Event& event);
 
-        void brushDraw();
+        void brushDraw(sf::Color color);
 };

@@ -9,7 +9,7 @@ list(APPEND CMAKE_PREFIX_PATH "E:/Cod/C++/Libraries/SFML-3.1.0")
 
 find_package(SFML 3.1 COMPONENTS Graphics Window System Audio REQUIRED)
 
-add_executable(SFML_Paint main.cpp paint.cpp paint.hpp config.hpp)
+add_executable(SFML_Paint main.cpp paint.cpp paint.hpp config.hpp ui.hpp ui.cpp)
 
 target_link_libraries(SFML_Paint PRIVATE SFML::Graphics SFML::Window SFML::System SFML::Audio)
 
