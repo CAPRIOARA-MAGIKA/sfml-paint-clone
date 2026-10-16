@@ -21,6 +21,8 @@ class Paint{
         sf::CircleShape brush;
         bool isDrawing;
         bool isErasing;
+        sf::Vector2f mousePos;
+        sf::Color currentColor;
 
         void processEvents();
         void update();
@@ -29,5 +31,6 @@ class Paint{
         void handleWindowClose(const sf::Event& event);
         void handleInput(const sf::Event& event);
 
+        void getMousePos();
         void brushDraw(sf::Color color);
 };

@@ -32,7 +32,7 @@ void Paint::processEvents(){
 
 void Paint::update(){
     if(isDrawing){
-        brushDraw(sf::Color::Red);
+        brushDraw(currentColor);
     }
     if(isErasing){
         brushDraw(sf::Color::White);
@@ -57,7 +57,14 @@ void Paint::handleWindowClose(const sf::Event& event){
 void Paint::handleInput(const sf::Event& event){
     if(const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>()){
         if(mousePressed->button == sf::Mouse::Button::Left){
-            isDrawing = true;
+            getMousePos();
+            if(ui.mouseInUI(mousePos)){
+                if(ui.pressedColor(mousePos)){
+                    currentColor = ui.selectedColor;
+                }
+            } else {
+                isDrawing = true;
+            }
         }
     }
     if(const auto* mouseReleased = event.getIf<sf::Event::MouseButtonReleased>()){
@@ -77,12 +84,16 @@ void Paint::handleInput(const sf::Event& event){
     }
 }
 
-void Paint::brushDraw(sf::Color color){
+void Paint::getMousePos(){
     sf::Vector2i mousePixelPos = sf::Mouse::getPosition(window);
-    sf::Vector2f mouseActualPos = window.mapPixelToCoords(mousePixelPos);
+    mousePos = window.mapPixelToCoords(mousePixelPos);
+}
+
+void Paint::brushDraw(sf::Color color){
+    getMousePos();
     sf::Vector2f mouseCanvasPos = {
-        mouseActualPos.x,
-        mouseActualPos.y - GameConfig::UI_OFFSET_Y
+        mousePos.x,
+        mousePos.y - GameConfig::UI_OFFSET_Y
     };
     brush.setFillColor(color);
     brush.setOrigin({10.0f, 10.0f});
