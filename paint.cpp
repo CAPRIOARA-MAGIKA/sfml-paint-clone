@@ -5,7 +5,8 @@ Paint::Paint() : window(sf::VideoMode({GameConfig::SCREEN_RESOLUTION_X, GameConf
                  canvas({GameConfig::SCREEN_RESOLUTION_X, GameConfig::SCREEN_RESOLUTION_Y - GameConfig::UI_OFFSET_Y}),
                  canvasSprite(canvas.getTexture()),
                  isDrawing(false),
-                 isErasing(false)
+                 isErasing(false),
+                 drawSize(GameConfig::STARTING_DRAW_SIZE)
 {
     canvas.clear(sf::Color::White);
     canvas.display();
@@ -31,12 +32,14 @@ void Paint::processEvents(){
 }
 
 void Paint::update(){
+    getMousePos();
     if(isDrawing){
         brushDraw(currentColor);
     }
     if(isErasing){
         brushDraw(sf::Color::White);
     }
+    ui.update(mousePos);
 }
 
 void Paint::render(){
@@ -57,10 +60,12 @@ void Paint::handleWindowClose(const sf::Event& event){
 void Paint::handleInput(const sf::Event& event){
     if(const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>()){
         if(mousePressed->button == sf::Mouse::Button::Left){
-            getMousePos();
             if(ui.mouseInUI(mousePos)){
                 if(ui.pressedColor(mousePos)){
                     currentColor = ui.selectedColor;
+                }
+                if(ui.pressedSizeLimiter(mousePos)){
+                    ui.isDraggingSizeBall = true;
                 }
             } else {
                 isDrawing = true;
@@ -69,6 +74,8 @@ void Paint::handleInput(const sf::Event& event){
     }
     if(const auto* mouseReleased = event.getIf<sf::Event::MouseButtonReleased>()){
         if(mouseReleased->button == sf::Mouse::Button::Left){
+            drawSize = ui.drawSize;
+            ui.isDraggingSizeBall = false;
             isDrawing = false;
         }
     }
@@ -96,8 +103,8 @@ void Paint::brushDraw(sf::Color color){
         mousePos.y - GameConfig::UI_OFFSET_Y
     };
     brush.setFillColor(color);
-    brush.setOrigin({10.0f, 10.0f});
-    brush.setRadius(10.0f);
+    brush.setOrigin({drawSize, drawSize});
+    brush.setRadius(drawSize);
     brush.setPosition(mouseCanvasPos); 
 
     canvas.draw(brush);

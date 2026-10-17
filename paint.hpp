@@ -23,6 +23,7 @@ class Paint{
         bool isErasing;
         sf::Vector2f mousePos;
         sf::Color currentColor;
+        float drawSize;
 
         void processEvents();
         void update();

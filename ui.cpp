@@ -2,7 +2,8 @@
 #include "config.hpp"
 #include <iostream>
 
-UI::UI() 
+UI::UI() : isDraggingSizeBall(false),
+           drawSize(GameConfig::STARTING_DRAW_SIZE)
 {
     init();
 }
@@ -10,14 +11,39 @@ UI::UI()
 void UI::init(){
     topBarInit();
     colorsInit();
+    sizeBarInit();
 }
 
 void UI::topBarInit(){
     sf::Color topBarColor(128,128,128);
     topBar.setFillColor(topBarColor);
-    topBar.setOrigin({0.0f, 0.0f});
     topBar.setPosition({0.0f, 0.0f});
     topBar.setSize({GameConfig::SCREEN_RESOLUTION_X, GameConfig::UI_OFFSET_Y});
+}
+
+void UI::sizeBarInit(){
+    sf::Color sizeBarColor(128,128,128);
+    sizeBar.setFillColor(sizeBarColor);
+    sizeBar.setPosition({10.0f , GameConfig::SCREEN_RESOLUTION_Y / 4});
+    sizeBar.setSize({50.0f , GameConfig::SCREEN_RESOLUTION_Y / 2});
+
+    sizeBarLimiter.setFillColor(sf::Color::Black);
+    sizeBarLimiter.setSize({
+        sizeBar.getSize().x * 1.0f/4.0f,
+        sizeBar.getSize().y * 29.0f/32.0f
+    });
+    sizeBarLimiter.setPosition({
+        sizeBar.getPosition().x + (sizeBar.getSize().x - sizeBarLimiter.getSize().x) / 2.0f,
+        sizeBar.getPosition().y + (sizeBar.getSize().y - sizeBarLimiter.getSize().y) / 2.0f
+    });
+
+    sizeBarBall.setFillColor(sf::Color::Green);
+    sizeBarBall.setRadius(sizeBarLimiter.getSize().x);
+    sizeBarBall.setOrigin({sizeBarBall.getRadius(), sizeBarBall.getRadius()});
+    sizeBarBall.setPosition({
+        sizeBarLimiter.getPosition().x + sizeBarLimiter.getSize().x / 2.0f,
+        sizeBarLimiter.getPosition().y + sizeBarLimiter.getSize().y - GameConfig::STARTING_DRAW_SIZE * 4,
+    });
 }
 
 void UI::colorsInit(){
@@ -52,7 +78,10 @@ void UI::colorsInit(){
 }
 
 bool UI::mouseInUI(sf::Vector2f mousePos){
-    if (mousePos.y < GameConfig::UI_OFFSET_Y){
+    if(topBar.getGlobalBounds().contains(mousePos)){
+        return true;
+    }
+    if(sizeBar.getGlobalBounds().contains(mousePos)){
         return true;
     }
     return false;
@@ -68,8 +97,31 @@ bool UI::pressedColor(sf::Vector2f mousePos){
     return false;
 }
 
+bool UI::pressedSizeLimiter(sf::Vector2f mousePos){
+    if(sizeBarLimiter.getGlobalBounds().contains(mousePos)){
+        return true;
+    }
+    return false;
+}
+
+void UI::setDrawSize(sf::Vector2f mousePos){
+    if(mousePos.y >= sizeBarLimiter.getPosition().y && mousePos.y <= sizeBarLimiter.getPosition().y + sizeBarLimiter.getSize().y){
+        sizeBarBall.setPosition({sizeBarBall.getPosition().x , mousePos.y});
+        drawSize = (sizeBarLimiter.getPosition().y + sizeBarLimiter.getSize().y - sizeBarBall.getPosition().y) / 4.0f;
+    }
+}
+
+void UI::update(sf::Vector2f mousePos){
+    if(isDraggingSizeBall){
+        setDrawSize(mousePos);
+    }
+}
+
 void UI::render(sf::RenderWindow& window){
     window.draw(topBar);
+    window.draw(sizeBar);
+    window.draw(sizeBarLimiter);
+    window.draw(sizeBarBall);
     for(int i = 0; i<cButtons.size(); i++){
         window.draw(cButtons[i].button);
     }
